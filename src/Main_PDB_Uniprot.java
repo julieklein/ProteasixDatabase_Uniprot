@@ -44,13 +44,13 @@ public class Main_PDB_Uniprot {
 		int lineCount = getLineCount(UniprotIDListURL);
 		String UniprotURLdebut = "http://www.uniprot.org/uniprot/?query=(organism%3A10116+OR+organism%3A9606+OR+organism%3A10090)+reviewed%3Ayes%22+cleavage%3B%22&format=xml&limit=100&offset=";
 //		String UniprotURL = "http://www.uniprot.org/uniprot/?query=(organism%3A10116+OR+organism%3A9606+OR+organism%3A10090)+reviewed%3Ayes%22+cleavage%3B%22&format=xml&limit=100";
-
+//
 		String UniprotURL = null;
 		int offset = 0;
 		while (offset < lineCount) {
 			UniprotURL = UniprotURLdebut + offset;
 			System.out.println(UniprotURL);
-//			 String UniprotURL = "http://www.uniprot.org/uniprot/P05067.xml";
+//			 String UniprotURL = "http://www.uniprot.org/uniprot/P01375.xml";
 
 			NodeList entries = getEntries(
 					"/uniprot/entry[./feature[@type='site'][contains(@description, 'Cleavage')]]",
@@ -91,6 +91,7 @@ public class Main_PDB_Uniprot {
 				System.arraycopy(intermediatecapacityarray, 0, firstcapacityarray, 0, k);
 				System.out.println(csdbentries.getLength());
 				int difference = 0;
+				int l = 0;
 				
 				for (int j = 0; j < csdbentries.getLength(); j++) {
 					
@@ -204,20 +205,37 @@ public class Main_PDB_Uniprot {
 					String proteaseTaxon = substrateTaxon;
 //					proteasedatabase.setP_Taxon(proteaseTaxon);
 					String curationUni = "-";
-
+					
+//					for (CsDatabaseEntry string : firstcapacityarray) {
+//						System.out.println("MAIN " + string);
+//					}
+					
 					intermediatecapacityarray = mapProteasetoLibrairy(commentS,
 							proteaseTaxon, description, firstcapacityarray, k+difference, kFirst, curationUni);
-					System.out.println("been there");
+					
 					kInt = intermediatecapacityarray.length;
-					System.out.println(kInt);
+					l = kInt - firstcapacityarray.length ;		
+					System.out.println("L " + l);
+					if (l == 0) {
+						k++;
+					} else if ( l == 1) {
+						difference++;
+						difference++;
+					} else if ( l == 2) {
+						difference++;
+						difference++;
+						difference++;
+					}
+//					System.out.println("DIFFERENCE " + difference);
+//					System.out.println("K " + k);
 					firstcapacityarray = new CsDatabaseEntry[kInt];
 					System.arraycopy(intermediatecapacityarray, 0, firstcapacityarray, 0, kInt);
-					if (kInt - kFirst > 0) {
-						difference = kInt - kFirst;
-					} else {
-					k++;
-					}
-					
+					firstcapacityarray = intermediatecapacityarray;
+//					for (CsDatabaseEntry string : firstcapacityarray) {
+//						System.out.println("AFTER MAIN" + string);
+//					}
+//					firstcapacityarray = intermediatecapacityarray;
+					System.out.println("NEW FIRST " + firstcapacityarray.length);
 				}
 				k = kInt;
 			}
@@ -231,6 +249,9 @@ public class Main_PDB_Uniprot {
             csvWriter = new PrintStream("UninotcuratedProteasixDB" + "_" + version + ".csv");
 //            populateHeaders(csvWriter);
            for (CsDatabaseEntry csDatabaseEntry : intermediatecapacityarray) {
+        	   System.out.println(csDatabaseEntry.getExternal_Link());
+        	   System.out.println(csDatabaseEntry.getP1_Position());
+        	   System.out.println(csDatabaseEntry.protease.getP_Symbol());
         	   System.out.println(csDatabaseEntry);
                 populateData(csvWriter, csDatabaseEntry);
             }
@@ -240,8 +261,6 @@ public class Main_PDB_Uniprot {
         } finally {
             csvWriter.close();
         }
-		
-		
 		
 		}
 
@@ -441,7 +460,7 @@ public class Main_PDB_Uniprot {
 		proteasedatabase.setP_Symbol("To check");
 		proteasedatabase.setP_UniprotID("To check");
 		firstcapacityarrray[j].setProtease(proteasedatabase);
-		kInt = kFirst;
+		kInt = firstcapacityarrray.length;
 		intermediatecapacityarray = new CsDatabaseEntry[kInt];
 		System.arraycopy(firstcapacityarrray, 0, intermediatecapacityarray, 0, kFirst);
 		intermediatecapacityarray = firstcapacityarrray;
@@ -457,18 +476,19 @@ public class Main_PDB_Uniprot {
 				String splitProtease[] = protease.split(", ");
 				int splitPsize = splitProtease.length;
 				if (splitPsize > 1) {
-					kInt = kFirst + splitPsize-1;
+					kInt = firstcapacityarrray.length + splitPsize-1;
 				} else {
-					kInt = kFirst;
+					kInt = firstcapacityarrray.length;
 				}
+				System.out.println("j " + j);
 				
 				intermediatecapacityarray = new CsDatabaseEntry[kInt];
-				System.arraycopy(firstcapacityarrray, 0, intermediatecapacityarray, 0, kFirst);	
+				System.arraycopy(firstcapacityarrray, 0, intermediatecapacityarray, 0, firstcapacityarrray.length);	
 				ProteaseDatabaseEntry[] proteasedataarray = new ProteaseDatabaseEntry[splitPsize];
-				
+//				for (CsDatabaseEntry string : intermediatecapacityarray) {
+//					System.out.println("SMALL " + string);
+//				}
 				for (int i = 0; i < splitPsize; i++) {		
-					int k = j+i;
-					System.out.println(k + "new entry");
 					proteasedataarray[i] = new ProteaseDatabaseEntry();
 					proteasedataarray[i].setP_Taxon(proteaseTaxon);
 					proteasedataarray[i].setP_NL_Name(proteaseDescription);
@@ -497,7 +517,6 @@ public class Main_PDB_Uniprot {
 							+ ".xml";
 					NodeList entries = getEntries("/uniprot/entry",
 							parseUniprot(UniprotURL));
-					System.out.println(entries.getLength() + "found");
 					for (int j1 = 0; j1 < entries.getLength(); j1++) {
 						 protname = getUniProteasepproteinname(entries, j1, proteasedataarray, i);
 						 genename = getUniProteasegenename(entries, j1,
@@ -514,12 +533,12 @@ public class Main_PDB_Uniprot {
 					}
 					commentP = commentS + ";-";
 					intermediatecapacityarray[j+i].setComment(commentP);
-					
 				}
-				
-			}
+			}	
 		}
-		
+//		for (CsDatabaseEntry csDatabaseEntry : intermediatecapacityarray) {
+//			System.out.println("AFTER SMALL " + csDatabaseEntry);
+//		}
 		return intermediatecapacityarray;
 	}
 
