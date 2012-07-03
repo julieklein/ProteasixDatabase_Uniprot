@@ -321,6 +321,7 @@ public class Main_PDB_Uniprot {
 			protname = protname.replaceAll(",", "");
 			System.out.println(protname);
 			substratedatabase.setS_NL_Name(protname);
+			substratedatabase.setS_Name(protname);
 		}
 		return substratedatabase;
 	}
@@ -579,7 +580,7 @@ public class Main_PDB_Uniprot {
 	  private void populateData(PrintStream csvWriter, CsDatabaseEntry csdatabase) {
 	        //System.out.println(cleavageSiteDBEntry);
 	        
-	        csvWriter.print(csdatabase.protease.getP_NL_Name());
+	        csvWriter.print(csdatabase.protease.getP_Name());
 	        csvWriter.print(",");
 	        csvWriter.print(csdatabase.protease.getP_Symbol());
 	        csvWriter.print(",");

@@ -7,8 +7,17 @@ public class SubstrateDatabaseEntry {
 	    public void setS_NL_Name(String S_NL_Name) {
 	        this.S_NL_Name = S_NL_Name;
 	    }
+	    private String S_Name;
 
-	    public String getS_Symbol() {
+	    public String getS_Name() {
+			return S_Name;
+		}
+
+		public void setS_Name(String s_Name) {
+			S_Name = s_Name;
+		}
+
+		public String getS_Symbol() {
 	        return S_Symbol;
 	    }
 
